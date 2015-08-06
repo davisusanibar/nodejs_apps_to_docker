@@ -1,5 +1,21 @@
-FROM centos:centos7
+FROM    centos:centos6
 
-RUN yum -y update; yum clean all
-RUN yum -y install epel-release; yum clean all
-RUN yum -y install nodejs npm; yum clean all
+RUN yum install -y \
+      curl \
+      git \
+      perl \
+      which \
+ && yum clean all
+
+RUN curl -sL -o ns.rpm https://rpm.nodesource.com/pub_0.12/el/6/x86_64/nodejs-0.12.7-1nodesource.el6.x86_64.rpm \
+ && rpm -i --nosignature --force ns.rpm \
+ && rm -f ns.rpm
+
+# Bundle app source
+COPY /node_app /src
+
+# Install app dependencies
+RUN cd /src; npm install
+
+EXPOSE  8080
+CMD ["node", "/src/index.js", "8080"]
